@@ -34,7 +34,7 @@ const DEFAULT_TRANSFER = {
   accountNumber: '113366668888',
   amount: '79000',
   memo: 'Ung Ho Quy Vac Xin',
-  template: 'xefSukK' // Your custom template ID
+  template: 'compact' // Your custom template ID
 };
 
 // Helper function to save a base64 image to file
