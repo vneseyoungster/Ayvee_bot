@@ -1,0 +1,26 @@
+{
+  "name": "vietqr-telegram-bot",
+  "version": "1.0.0",
+  "description": "A Telegram bot that generates QR codes for bank transfers using the VietQR API",
+  "main": "index.js",
+  "scripts": {
+    "start": "node index.js",
+    "dev": "nodemon index.js"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "keywords": ["telegram", "bot", "vietqr", "qr-code"],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "dotenv": "^16.4.5",
+    "node-telegram-bot-api": "^0.66.0",
+    "vietqr": "file:../vietqr-node",
+    "axios": "^0.24.0"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.0"
+  }
+}
