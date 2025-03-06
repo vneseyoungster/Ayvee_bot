@@ -6,7 +6,9 @@ WORKDIR /usr/src/app
 
 # Copy package files
 COPY package*.json ./
-COPY vietqr-node ../vietqr-node
+
+# Copy local dependencies
+COPY lib ./lib
 
 # Install dependencies
 RUN npm install

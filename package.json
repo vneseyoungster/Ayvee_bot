@@ -17,7 +17,7 @@
   "dependencies": {
     "dotenv": "^16.4.5",
     "node-telegram-bot-api": "^0.66.0",
-    "vietqr": "file:../vietqr-node",
+    "vietqr": "file:./lib/vietqr-node",
     "axios": "^0.24.0"
   },
   "devDependencies": {
