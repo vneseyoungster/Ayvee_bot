@@ -34,7 +34,7 @@ const DEFAULT_TRANSFER = {
   accountNumber: '113366668888',
   amount: '79000',
   memo: 'Ung Ho Quy Vac Xin',
-  template: 'compact'
+  template: 'xefSukK' // Your custom template ID
 };
 
 // Helper function to save a base64 image to file
@@ -81,11 +81,11 @@ bot.onText(/\/help/, (msg) => {
     'Available parameters:\n' +
     '- bank: Bank ID (e.g., 970415)\n' +
     '- accountName: Account name\n' +
-    '- accountNumber: Account number\n' +
+    '- accountNumber: Bank account number\n' +
     '- amount: Amount to transfer\n' +
     '- memo: Transfer description\n' +
-    '- template: QR template (qr_only, compact, compact2)\n\n' +
-    'Example: /qr bank=970415 accountName=John accountNumber=123456789 amount=100000 memo=Payment template=compact'
+    '- template: QR template (xefSukK or qr_only, compact, compact2)\n\n' +
+    'Example: /qr bank=970415 accountName=John accountNumber=123456789 amount=100000 memo=Payment template=xefSukK'
   );
 });
 
