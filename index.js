@@ -8,7 +8,7 @@ const path = require('path');
 const TELEGRAM_BOT_TOKEN = process.env.TELEGRAM_BOT_TOKEN;
 const VIETQR_CLIENT_ID = process.env.VIETQR_CLIENT_ID;
 const VIETQR_API_KEY = process.env.VIETQR_API_KEY;
-
+const PORT = process.env.PORT || 3000;
 // Validate environment variables
 if (!TELEGRAM_BOT_TOKEN) {
   throw new Error('TELEGRAM_BOT_TOKEN is not defined in .env file');
