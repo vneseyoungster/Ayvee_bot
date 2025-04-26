@@ -24,8 +24,28 @@ const vietQR = new VietQR({
   apiKey: VIETQR_API_KEY,
 });
 
-// Initialize the Telegram Bot with polling
-const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { polling: true });
+// Track processed message IDs to prevent duplicate processing
+const processedMessages = new Set();
+// Cleanup old message IDs periodically (keep only last 1000 messages)
+setInterval(() => {
+  if (processedMessages.size > 1000) {
+    const messagesToKeep = [...processedMessages].slice(-1000);
+    processedMessages.clear();
+    messagesToKeep.forEach(id => processedMessages.add(id));
+  }
+}, 3600000); // Clean up every hour
+
+// Initialize the Telegram Bot with improved polling options
+const bot = new TelegramBot(TELEGRAM_BOT_TOKEN, { 
+  polling: {
+    interval: 300, // Poll every 300ms
+    params: {
+      timeout: 10, // Wait 10 seconds for updates
+      limit: 100 // Get up to 100 updates at once
+    },
+    autoStart: true
+  }
+});
 
 // Default transfer values
 const DEFAULT_TRANSFER = {
@@ -58,8 +78,14 @@ async function saveBase64Image(base64Data, outputPath) {
 }
 
 // Welcome message when user starts the bot
-bot.onText(/\/start/, (msg) => {
+bot.onText(/^\/start$/, (msg) => {
   const chatId = msg.chat.id;
+  // Check if we've already processed this message
+  if (processedMessages.has(msg.message_id)) {
+    return;
+  }
+  processedMessages.add(msg.message_id);
+  
   bot.sendMessage(
     chatId,
     'Welcome to VietQR Bot! Use /qr command to generate a QR code for bank transfer.\n\n' +
@@ -69,8 +95,14 @@ bot.onText(/\/start/, (msg) => {
 });
 
 // Help command
-bot.onText(/\/help/, (msg) => {
+bot.onText(/^\/help$/, (msg) => {
   const chatId = msg.chat.id;
+  // Check if we've already processed this message
+  if (processedMessages.has(msg.message_id)) {
+    return;
+  }
+  processedMessages.add(msg.message_id);
+  
   bot.sendMessage(
     chatId,
     'Commands:\n' +
@@ -90,8 +122,13 @@ bot.onText(/\/help/, (msg) => {
 });
 
 // List banks command
-bot.onText(/\/banks/, async (msg) => {
+bot.onText(/^\/banks$/, async (msg) => {
   const chatId = msg.chat.id;
+  // Check if we've already processed this message
+  if (processedMessages.has(msg.message_id)) {
+    return;
+  }
+  processedMessages.add(msg.message_id);
   
   try {
     bot.sendMessage(chatId, 'Fetching list of supported banks...');
@@ -116,8 +153,13 @@ bot.onText(/\/banks/, async (msg) => {
 });
 
 // List templates command
-bot.onText(/\/templates/, async (msg) => {
+bot.onText(/^\/templates$/, async (msg) => {
   const chatId = msg.chat.id;
+  // Check if we've already processed this message
+  if (processedMessages.has(msg.message_id)) {
+    return;
+  }
+  processedMessages.add(msg.message_id);
   
   try {
     bot.sendMessage(chatId, 'Fetching available templates...');
@@ -140,9 +182,17 @@ bot.onText(/\/templates/, async (msg) => {
   }
 });
 
-// QR generation command
-bot.onText(/\/qr(.*)/, async (msg, match) => {
+// QR generation command with improved regex pattern
+bot.onText(/^\/qr(?!\w)(.*)/, async (msg, match) => {
   const chatId = msg.chat.id;
+  // Check if we've already processed this message
+  if (processedMessages.has(msg.message_id)) {
+    console.log(`Bot: Skipping already processed message ID: ${msg.message_id}`);
+    return;
+  }
+  processedMessages.add(msg.message_id);
+  console.log(`Bot: Processing new QR request, message ID: ${msg.message_id}`);
+  
   const params = match[1].trim();
   
   try {
@@ -191,7 +241,7 @@ bot.onText(/\/qr(.*)/, async (msg, match) => {
       }
       
       // Unique filename
-      const filename = `qr_${Date.now()}.png`;
+      const filename = `qr_${Date.now()}_${msg.message_id}.png`;
       const filePath = path.join(tmpDir, filename);
       console.log('Bot: Saving QR code to:', filePath);
       
@@ -233,12 +283,24 @@ bot.onText(/\/qr(.*)/, async (msg, match) => {
 
 // Handle unknown commands
 bot.on('message', (msg) => {
-  const chatId = msg.chat.id;
-  
-  // Only respond to text messages that start with '/'
-  if (msg.text && msg.text.startsWith('/') && !msg.text.match(/^\/(start|help|qr|banks|templates)/)) {
-    bot.sendMessage(chatId, 'Unknown command. Type /help to see available commands.');
+  // Only respond to unrecognized commands, not all messages
+  if (!msg.text || !msg.text.startsWith('/')) {
+    return;
   }
+  
+  // Check if this is a command we already handle with onText
+  if (msg.text.match(/^\/(start|help|qr|banks|templates)($|\s)/)) {
+    return;
+  }
+  
+  // Check if we've already processed this message
+  if (processedMessages.has(msg.message_id)) {
+    return;
+  }
+  processedMessages.add(msg.message_id);
+  
+  const chatId = msg.chat.id;
+  bot.sendMessage(chatId, 'Unknown command. Type /help to see available commands.');
 });
 
 // Start the bot
